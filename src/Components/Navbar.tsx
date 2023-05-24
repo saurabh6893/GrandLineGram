@@ -13,15 +13,15 @@ const Navbar = () => {
   return (
     <div className='links'>
       <Link to='/'>Home</Link>
-      <Link to='/login'>Login</Link>
-      {user && (
+      {user ? (
         <div className='profile'>
           <h2>{Auth ? Auth.currentUser?.displayName : 'Home'}</h2>
           <button className='logout' onClick={signUserOut}>
-            {' '}
             Logout
           </button>
         </div>
+      ) : (
+        <Link to='/login'>Login</Link>
       )}
     </div>
   )

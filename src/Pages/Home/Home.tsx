@@ -6,8 +6,16 @@ const Home = () => {
   return (
     <div className='card'>
       <div className='dataCard'>
-        <h2>{Auth ? user?.displayName : 'Home'}</h2>
-        {user?.photoURL && <img src={user.photoURL} alt='pic' width='250px' />}
+        {user ? (
+          <>
+            <h2 className='profileHeading'>{user?.displayName}</h2>
+            {user?.photoURL && (
+              <img src={user.photoURL} alt='pic' width='250px' />
+            )}
+          </>
+        ) : (
+          <h2>Home</h2>
+        )}
       </div>
     </div>
   )
