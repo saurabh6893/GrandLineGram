@@ -5,6 +5,7 @@ import HomePage from './Pages/HomePage/HomePage'
 import Login from './Pages/Login/Login'
 import Error from './Pages/Error/Error'
 import Home from './Pages/Home/Home'
+import CreatePost from './Pages/CreatePost/CreatePost'
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
           <Route path='/' element={<HomePage />}>
             <Route index element={<Home />} />
             <Route path='/Login' element={<Login />} />
+            <Route path='/CreatePost' element={<CreatePost />} />
             <Route path='*' element={<Error />} />
           </Route>
         </Routes>

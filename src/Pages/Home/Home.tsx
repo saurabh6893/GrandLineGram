@@ -7,12 +7,12 @@ const Home = () => {
     <div className='card'>
       <div className='dataCard'>
         {user ? (
-          <>
+          <div className='profileCard'>
             <h2 className='profileHeading'>{user?.displayName}</h2>
             {user?.photoURL && (
               <img src={user.photoURL} alt='pic' width='250px' />
             )}
-          </>
+          </div>
         ) : (
           <h2>Home</h2>
         )}

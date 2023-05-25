@@ -18,3 +18,10 @@
   font-family: 'Sacramento', cursive;
   font-size: 50px;
 }
+
+.profileCard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
