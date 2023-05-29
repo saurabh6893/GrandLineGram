@@ -28,6 +28,7 @@ const CreateForm = () => {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+
   const PostsRef = collection(database, 'Posts')
   const submitter = async (data: FormData) => {
     await addDoc(PostsRef, {

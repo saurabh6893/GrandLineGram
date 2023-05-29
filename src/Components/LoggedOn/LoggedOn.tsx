@@ -3,8 +3,10 @@ import { Auth } from '../../Configs/Firebaseconfig'
 import { BiLogOutCircle } from 'react-icons/bi'
 import { signOut } from 'firebase/auth'
 import { Link } from 'react-router-dom'
+import { useAuthState } from 'react-firebase-hooks/auth'
 
 const LoggedOn = () => {
+  const [user] = useAuthState(Auth)
   const signUserOut = async () => {
     await signOut(Auth)
   }
@@ -14,7 +16,12 @@ const LoggedOn = () => {
         <h2>CreatePost</h2>
       </Link>
       <div className='pill'>
-        <h2>{Auth ? Auth.currentUser?.displayName : 'Home'}</h2>
+        <h2>{user ? user.displayName : 'Home'}</h2>
+        <div>
+          {user?.photoURL && (
+            <img src={user.photoURL} alt='pic' width='80px' className='imx' />
+          )}
+        </div>
         <BiLogOutCircle onClick={signUserOut} className='links' size='35px' />
       </div>
     </div>

@@ -3,7 +3,7 @@
   justify-content: space-around;
   align-items: center;
   background-color: #264653;
-  height: 60px;
+  height: 100px;
   width: 100%;
   position: fixed;
   top: 0;
@@ -38,8 +38,23 @@
 .pill {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  transform: translate(30%, 0);
+  width: 600px;
+  justify-content: space-evenly;
   align-items: center;
+}
+
+.pill h2 {
+  transform: translateX(25%);
+}
+.imx {
+  border-radius: 50px;
+  border: 5px solid black;
+  transition: 0.5s;
+}
+.imx:hover {
+  border-radius: 25px;
+  border: 10px solid grey;
 }
 h2 {
   text-decoration: none;
