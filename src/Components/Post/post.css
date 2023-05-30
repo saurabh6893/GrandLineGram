@@ -1,13 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Saira+Condensed&family=Sofia&display=swap');
 
 .postcard {
-  border: 2px solid black;
+  border: 2px solid #2a9d8f;
   background-color: #e9c46a;
   border-radius: 25px;
   padding: 20px;
   max-width: 500px;
   margin: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.postcard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .title {
@@ -19,29 +25,48 @@
 }
 
 .title h2 {
-  font-size: 50px;
+  font-size: 40px;
   text-transform: capitalize;
   margin: 0;
+  font-family: 'Berkshire Swash', cursive;
 }
 
 .desc p {
-  font-size: 30px;
+  font-size: 24px;
   margin-bottom: 10px;
+  font-family: 'Saira Condensed', sans-serif;
+}
+
+.username {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .username p {
   font-size: 20px;
-  text-align: right;
-  margin-top: auto;
-  margin-bottom: 0;
-  padding: 10px 40px;
+  margin: 0;
+  padding: 10px;
   color: #e76f51;
   font-weight: bold;
   font-family: 'Sofia', cursive;
 }
 
-.postcard:hover {
-  transform: translateY(-5px);
-  transition: transform 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.username button {
+  font-size: 20px;
+  margin-left: 10px;
+  padding: 10px 20px;
+  color: #000;
+  background-color: #e9c46a;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Sofia', cursive;
+  outline: none;
+  transition: background-color 0.3s ease;
+}
+
+.username button:hover {
+  background-color: #f4a261;
 }

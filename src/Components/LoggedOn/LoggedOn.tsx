@@ -18,9 +18,11 @@ const LoggedOn = () => {
       <div className='pill'>
         <h2>{user ? user.displayName : 'Home'}</h2>
         <div>
-          {user?.photoURL && (
-            <img src={user.photoURL} alt='pic' width='80px' className='imx' />
-          )}
+          <Link to='/Profile'>
+            {user?.photoURL && (
+              <img src={user.photoURL} alt='pic' width='80px' className='imx' />
+            )}
+          </Link>
         </div>
         <BiLogOutCircle onClick={signUserOut} className='links' size='35px' />
       </div>

@@ -19,7 +19,8 @@ const Post = (props: PostProps) => {
       </div>
 
       <div className='username'>
-        <p>{post.username}</p>
+        <p>@{post.username}</p>
+        <button>&#128077;</button>
       </div>
     </div>
   )

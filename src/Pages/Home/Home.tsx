@@ -4,6 +4,7 @@ import { useAuthState } from 'react-firebase-hooks/auth'
 import { collection, getDocs } from 'firebase/firestore'
 import Post from '../../Components/Post/Post'
 import './Home.css'
+import Profile from '../../Components/Profile/Profile'
 
 export interface Post {
   id: string
@@ -31,19 +32,7 @@ const Home = () => {
 
   return (
     <>
-      <div className='card'>
-        {user ? (
-          <div className='profileCard'>
-            <h2 className='profileHeading'>{user?.displayName}</h2>
-            {user?.photoURL && (
-              <img src={user.photoURL} alt='pic' className='profilepic' />
-            )}
-          </div>
-        ) : (
-          <h2>Home</h2>
-        )}
-      </div>
-      <div>
+      <div className='postscreen'>
         {postList?.map((post: Post) => (
           <Post post={post} />
         ))}
