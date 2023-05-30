@@ -1,6 +1,9 @@
 import React from 'react'
 import { Post as PostInterface } from '../../Pages/Home/Home'
 import './post.css'
+import { addDoc, collection } from 'firebase/firestore'
+import { Auth, database } from '../../Configs/Firebaseconfig'
+import { useAuthState } from 'react-firebase-hooks/auth'
 
 interface PostProps {
   post: PostInterface
@@ -8,6 +11,11 @@ interface PostProps {
 
 const Post = (props: PostProps) => {
   const { post } = props
+  const LikesRef = collection(database, 'Likes')
+  const [user] = useAuthState(Auth)
+  const LikeFunction = async () => {
+    await addDoc(LikesRef, { userId: user?.uid, postId: post.id })
+  }
   return (
     <div className='postcard'>
       <div className='title'>
@@ -20,7 +28,7 @@ const Post = (props: PostProps) => {
 
       <div className='username'>
         <p>@{post.username}</p>
-        <button>&#128077;</button>
+        <button onClick={LikeFunction}>&#128077;</button>
       </div>
     </div>
   )
