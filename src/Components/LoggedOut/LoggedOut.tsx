@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 const LoggedOut = () => {
   return (
     <div className='profile'>
-      <h2>Login</h2>
+      <h2></h2>
       <Link to='/login'>
         <BiLogInCircle className='links' size='35px' />
       </Link>

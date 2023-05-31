@@ -13,9 +13,13 @@ const Navbar = () => {
   return (
     <div className='Navxlinks'>
       <h2>
-        <Link to='/' className='links'>
-          Home
-        </Link>
+        {user ? (
+          <Link to='/' className='links'>
+            Home
+          </Link>
+        ) : (
+          <h2 className='links solo'> GranLineGram</h2>
+        )}
       </h2>
       {user ? <LoggedOn /> : <LoggedOut />}
     </div>
