@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore'
 import { Auth, database } from '../../Configs/Firebaseconfig'
 import { useAuthState } from 'react-firebase-hooks/auth'
+import { BiMerge, BiMessageAltDetail } from 'react-icons/bi'
 
 interface PostProps {
   post: PostInterface
@@ -22,11 +23,15 @@ interface LikeInterface {
   likeId: string
   userId: string
 }
+
 const Post = (props: PostProps) => {
   const [totalLikes, setTotalLikes] = useState<LikeInterface[] | null>(null)
+  const [viewComments, setViewComments] = useState<boolean>(false)
+  const [viewChaniedComments, setViewChaniedComments] = useState<boolean>(false)
 
   const { post } = props
   const LikesRef = collection(database, 'Likes')
+
   const LikesDoc = query(LikesRef, where('postId', '==', post.id))
   const [user] = useAuthState(Auth)
 
@@ -73,6 +78,13 @@ const Post = (props: PostProps) => {
   }
 
   const liked = totalLikes?.find((like) => like.userId === user?.uid)
+
+  const viewCommentsfunc = () => {
+    setViewComments(!viewComments)
+  }
+  const viewChaniedCommentsfunc = () => {
+    setViewChaniedComments(!viewChaniedComments)
+  }
   useEffect(() => {
     getLikes()
   }, [])
@@ -84,8 +96,25 @@ const Post = (props: PostProps) => {
       </div>
 
       <div className='desc'>
-        <p>{post.description}</p>
+        <p>{post.description}</p>{' '}
+        <BiMessageAltDetail className='cmtbox' onClick={viewCommentsfunc} />
       </div>
+      {viewComments && (
+        <div className='commentsbox'>
+          <div className='comment'>
+            <p>its true?</p>
+            <p>
+              name of Commenter <BiMerge onClick={viewChaniedCommentsfunc} />
+            </p>
+          </div>
+          {viewChaniedComments && (
+            <div className='mergecomment'>
+              <p>yes its true i confirmed it</p>
+              <p>name of Commenter</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className='username'>
         <p>@{post.username}</p>
