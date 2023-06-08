@@ -100,6 +100,7 @@ const Post = (props: PostProps) => {
     }
   };
 
+
   const liked = totalLikes?.find((like) => like.userId === user?.uid);
 
   const viewOrCreateCommentsFunc = () => {
@@ -170,18 +171,8 @@ const Post = (props: PostProps) => {
         </button>
         {totalLikes && <p> {totalLikes.length} Likes</p>}
       </div>
-
-      <div className='comments-section'>
-        {totalComments &&
-          totalComments.map((comment) => (
-            <div key={comment.commentId} className='comment'>
-              <p className='comment-text'>{comment.commentText}</p>
-              <p className='comment-username'>@{comment.userId}</p>
-            </div>
-          ))}
-      </div>
     </div>
   );
-};
+}
 
-export default Post;
+export default Post
