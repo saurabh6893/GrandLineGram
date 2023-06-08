@@ -14,6 +14,7 @@ import {
 import { Auth, database } from '../../Configs/Firebaseconfig'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { BiMerge, BiMessageAltDetail } from 'react-icons/bi'
+import { date } from 'zod'
 
 interface PostProps {
   post: PostInterface
@@ -24,16 +25,29 @@ interface LikeInterface {
   userId: string
 }
 
+interface CmtInterface {
+  commentId: string
+  userId: string
+  commentText: string
+  username: string
+}
+
 const Post = (props: PostProps) => {
   const [totalLikes, setTotalLikes] = useState<LikeInterface[] | null>(null)
-  const [viewComments, setViewComments] = useState<boolean>(false)
-  const [viewChaniedComments, setViewChaniedComments] = useState<boolean>(false)
-
+  const [totalComments, setTotalComments] = useState<CmtInterface[] | null>(null)
+  const [enableCommentInput, setEnableCommentInput] = useState<boolean>(false)
+  const [typingComment,setTypingComment]=useState<string>('')
+  
   const { post } = props
+
   const LikesRef = collection(database, 'Likes')
+  const CommentRef = collection(database, 'Comments')
 
   const LikesDoc = query(LikesRef, where('postId', '==', post.id))
+  const CommentDoc = query(CommentRef, where('commentId', '==', post.id))
+
   const [user] = useAuthState(Auth)
+
 
   const getLikes = async () => {
     const data = await getDocs(LikesDoc)
@@ -41,6 +55,31 @@ const Post = (props: PostProps) => {
       data.docs.map((doc) => ({ userId: doc.data().userId, likeId: doc.id }))
     )
   }
+  const getComments = async () => {
+    try {
+      const cmtData = await getDocs(CommentDoc);
+      const comments = cmtData.docs.map((doc) => ({
+        commentId: doc.id,
+        userId: doc.data().userId,
+        commentText: doc.data().commentText,
+        username: doc.data().username,
+      }));
+      setTotalComments(comments);
+    } catch (error) {
+      console.error('Error getting comments:', error);
+    }
+  }
+
+  const postComment = async () => {
+    
+    await addDoc(CommentRef, {
+      userId: user?.uid,
+      commentText: typingComment,
+      username: user?.displayName,
+      commentId: post.id, 
+    });
+  };
+  
   const LikeFunction = async () => {
     const newDox = await addDoc(LikesRef, {
       userId: user?.uid,
@@ -79,15 +118,16 @@ const Post = (props: PostProps) => {
 
   const liked = totalLikes?.find((like) => like.userId === user?.uid)
 
-  const viewCommentsfunc = () => {
-    setViewComments(!viewComments)
+
+  const viewOrCreateCommentsfunc = () => {
+    setEnableCommentInput(!enableCommentInput)
   }
-  const viewChaniedCommentsfunc = () => {
-    setViewChaniedComments(!viewChaniedComments)
-  }
+
   useEffect(() => {
     getLikes()
+    getComments()
   }, [])
+
 
   return (
     <div className='postcard'>
@@ -97,24 +137,25 @@ const Post = (props: PostProps) => {
 
       <div className='desc'>
         <p>{post.description}</p>{' '}
-        <BiMessageAltDetail className='cmtbox' onClick={viewCommentsfunc} />
-      </div>
-      {viewComments && (
-        <div className='commentsbox'>
-          <div className='comment'>
-            <p>its true?</p>
-            <p>
-              name of Commenter <BiMerge onClick={viewChaniedCommentsfunc} />
-            </p>
+        <>
+          <BiMessageAltDetail className='cmtbox' onClick={viewOrCreateCommentsfunc} />
+          <div className="cmtCount">
+            { 
+              totalComments && <p> {totalComments.length} comments</p>
+            }
           </div>
-          {viewChaniedComments && (
-            <div className='mergecomment'>
-              <p>yes its true i confirmed it</p>
-              <p>name of Commenter</p>
-            </div>
-          )}
-        </div>
-      )}
+        </>
+      </div>
+
+      <div className="commentsbox">
+        {
+          enableCommentInput && <>
+          <input type="text" onChange={(e)=>setTypingComment(e.target.value)}/>
+          <button onClick={postComment}>Shoot</button>
+          </>
+        }
+
+      </div>
 
       <div className='username'>
         <p>@{post.username}</p>
