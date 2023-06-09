@@ -133,6 +133,71 @@ const Post = (props: PostProps) => {
     }
   };
 
+  // const deletePost = async () => {
+  //   try {
+  //     // Delete the post document
+  //     const postDoc = doc(database, 'Posts', post.id);
+  //     await deleteDoc(postDoc);
+  
+  //     // Delete the likes associated with the post
+  //     const likesQuery = query(LikesRef, where('postId', '==', post.id));
+  //     const likesSnapshot = await getDocs(likesQuery);
+  //     likesSnapshot.forEach(async (likeDoc) => {
+  //       const likeId = likeDoc.id;
+  //       const likeToDelete = doc(database, 'Likes', likeId);
+  //       await deleteDoc(likeToDelete);
+  //     });
+  
+  //     // Delete the comments associated with the post
+  //     const commentsQuery = query(CommentsRef, where('postId', '==', post.id));
+  //     const commentsSnapshot = await getDocs(commentsQuery);
+  //     commentsSnapshot.forEach(async (commentDoc) => {
+  //       const commentId = commentDoc.id;
+  //       const commentToDelete = doc(database, 'Comments', commentId);
+  //       await deleteDoc(commentToDelete);
+  //     });
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
+
+  const deletePost = async () => {
+    try {
+      if (user?.uid !== post.userId) {
+        // User is not the owner of the post, do not allow deletion
+        console.log("You are not authorized to delete this post.");
+        return;
+      }
+  
+      // Delete the post document
+      const postDoc = doc(database, 'Posts', post.id);
+      await deleteDoc(postDoc);
+  
+      // Delete the likes associated with the post
+      const likesQuery = query(LikesRef, where('postId', '==', post.id));
+      const likesSnapshot = await getDocs(likesQuery);
+      likesSnapshot.forEach(async (likeDoc) => {
+        const likeId = likeDoc.id;
+        const likeToDelete = doc(database, 'Likes', likeId);
+        await deleteDoc(likeToDelete);
+      });
+  
+      // Delete the comments associated with the post
+      const commentsQuery = query(CommentsRef, where('postId', '==', post.id));
+      const commentsSnapshot = await getDocs(commentsQuery);
+      commentsSnapshot.forEach(async (commentDoc) => {
+        const commentId = commentDoc.id;
+        const commentToDelete = doc(database, 'Comments', commentId);
+        await deleteDoc(commentToDelete);
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  
+  
+
   useEffect(() => {
     getLikes();
     getComments();
@@ -142,6 +207,8 @@ const Post = (props: PostProps) => {
     <div className='postcard'>
       <div className='title'>
         <h2>{post.title}</h2>
+        <button onClick={deletePost}>Delete Post</button>
+
       </div>
 
       <div className='desc'>
