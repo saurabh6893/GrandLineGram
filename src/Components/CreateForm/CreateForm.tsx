@@ -17,8 +17,8 @@ const CreateForm = () => {
   const nav = useNavigate()
   const [user] = useAuthState(Auth)
   const schema: ZodType<FormData> = z.object({
-    title: z.string().min(10).max(30),
-    description: z.string().min(15).max(600),
+    title: z.string().min(3).max(40),
+    description: z.string().min(10).max(600),
   })
 
   const {

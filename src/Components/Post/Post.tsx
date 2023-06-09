@@ -29,6 +29,7 @@ interface CommentInterface {
   commentId: string;
   userId: string | undefined;
   commentText: string;
+  username:string|null|undefined;
 }
 
 const Post = (props: PostProps) => {
@@ -60,6 +61,7 @@ const Post = (props: PostProps) => {
         commentId: doc.id,
         userId: doc.data().userId,
         commentText: doc.data().commentText,
+        username: doc.data().username,
       }))
     );
   };
@@ -113,12 +115,14 @@ const Post = (props: PostProps) => {
           userId: user?.uid,
           postId: post.id,
           commentText: typingComment.trim(),
+          username:user?.displayName
         });
 
         const commentData: CommentInterface = {
           commentId: newComment.id,
           userId: user?.uid,
           commentText: typingComment.trim(),
+          username:user?.displayName
         };
 
         setTotalComments((prev) => (prev ? [...prev, commentData] : [commentData]));
@@ -176,7 +180,7 @@ const Post = (props: PostProps) => {
           totalComments.map((comment) => (
             <div key={comment.commentId} className='comment'>
               <p className='comment-text'>{comment.commentText}</p>
-              <p className='comment-username'>@{comment.userId}</p>
+              <p className='comment-username'>@{comment.username}</p>
             </div>
           ))}
       </div>
