@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Post as PostInterface } from '../../Pages/Home/Home';
+import { Post as PostInterface } from './../../Configs/Interfaces';
 import './post.css';
 import {
   addDoc,
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
   query,
   where,
 } from 'firebase/firestore';
 import { Auth, database } from '../../Configs/Firebaseconfig';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { BiMerge, BiMessageAltDetail } from 'react-icons/bi';
-import { date } from 'zod';
+import { BiMessageAltDetail } from 'react-icons/bi';
 
 interface PostProps {
   post: PostInterface;
+  onDelete: () => void;
 }
 
 interface LikeInterface {
@@ -29,58 +28,57 @@ interface CommentInterface {
   commentId: string;
   userId: string | undefined;
   commentText: string;
-  username:string|null|undefined;
+  username: string | null | undefined;
 }
 
 const Post = (props: PostProps) => {
-  const [totalLikes, setTotalLikes] = useState<LikeInterface[] | null>(null);
-  const [totalComments, setTotalComments] = useState<CommentInterface[] | null>(null);
-  const [enableCommentInput, setEnableCommentInput] = useState<boolean>(false);
-  const [typingComment, setTypingComment] = useState<string>('');
-  const { post } = props;
-
+  const { post, onDelete } = props;
+  const [user] = useAuthState(Auth);
   const LikesRef = collection(database, 'Likes');
   const CommentsRef = collection(database, 'Comments');
+  const [commentInput, setCommentInput] = useState('');
 
-  const LikesDoc = query(LikesRef, where('postId', '==', post.id));
-  const CommentsDoc = query(CommentsRef, where('postId', '==', post.id));
+  const getPostData = async () => {
+    const likesQuery = query(LikesRef, where('postId', '==', post.id));
+    const commentsQuery = query(CommentsRef, where('postId', '==', post.id));
+    const [likesSnapshot, commentsSnapshot] = await Promise.all([
+      getDocs(likesQuery),
+      getDocs(commentsQuery),
+    ]);
 
-  const [user] = useAuthState(Auth);
+    const totalLikes = likesSnapshot.docs.map((doc) => ({
+      userId: doc.data().userId,
+      likeId: doc.id,
+    })) as LikeInterface[];
 
-  const getLikes = async () => {
-    const data = await getDocs(LikesDoc);
-    setTotalLikes(
-      data.docs.map((doc) => ({ userId: doc.data().userId, likeId: doc.id }))
-    );
+    const totalComments = commentsSnapshot.docs.map((doc) => ({
+      commentId: doc.id,
+      userId: doc.data().userId,
+      commentText: doc.data().commentText,
+      username: doc.data().username,
+    })) as CommentInterface[];
+
+    setTotalLikes(totalLikes);
+    setTotalComments(totalComments);
   };
 
-  const getComments = async () => {
-    const data = await getDocs(CommentsDoc);
-    setTotalComments(
-      data.docs.map((doc) => ({
-        commentId: doc.id,
-        userId: doc.data().userId,
-        commentText: doc.data().commentText,
-        username: doc.data().username,
-      }))
-    );
-  };
+  const [totalLikes, setTotalLikes] = useState<LikeInterface[] | null>(null);
+  const [totalComments, setTotalComments] = useState<CommentInterface[] | null>(null);
 
-  const LikeFunction = async () => {
-    const newDox = await addDoc(LikesRef, {
+  const likeFunction = async () => {
+    const newDoc = await addDoc(LikesRef, {
       userId: user?.uid,
       postId: post.id,
     });
+
     if (user) {
       setTotalLikes((prev) =>
-        prev
-          ? [...prev, { userId: user.uid, likeId: newDox.id }]
-          : [{ userId: user.uid, likeId: newDox.id }]
+        prev ? [...prev, { userId: user.uid, likeId: newDoc.id }] : [{ userId: user.uid, likeId: newDoc.id }]
       );
     }
   };
 
-  const LikeDeletion = async () => {
+  const likeDeletion = async () => {
     try {
       const likeDeletionQuery = query(
         LikesRef,
@@ -88,10 +86,11 @@ const Post = (props: PostProps) => {
         where('userId', '==', user?.uid)
       );
 
-      const LikeDeletionData = await getDocs(likeDeletionQuery);
-      const likeId = LikeDeletionData.docs[0].id;
-      const liketoDelete = doc(database, 'Likes', likeId);
-      await deleteDoc(liketoDelete);
+      const likeDeletionData = await getDocs(likeDeletionQuery);
+      const likeId = likeDeletionData.docs[0].id;
+      const likeToDelete = doc(database, 'Likes', likeId);
+      await deleteDoc(likeToDelete);
+
       if (user) {
         setTotalLikes((prev) =>
           prev && prev.filter((like) => like.likeId !== likeId)
@@ -101,66 +100,37 @@ const Post = (props: PostProps) => {
       console.log(err);
     }
   };
-
   const liked = totalLikes?.find((like) => like.userId === user?.uid);
 
   const viewOrCreateCommentsFunc = () => {
-    setEnableCommentInput(!enableCommentInput);
+    setCommentInput('');
+    setTotalComments((prev) => (prev ? [] : null));
   };
 
   const postComment = async () => {
-    if (typingComment.trim() !== '') {
+    if (commentInput.trim() !== '') {
       try {
         const newComment = await addDoc(CommentsRef, {
           userId: user?.uid,
           postId: post.id,
-          commentText: typingComment.trim(),
-          username:user?.displayName
+          commentText: commentInput.trim(),
+          username: user?.displayName,
         });
 
         const commentData: CommentInterface = {
           commentId: newComment.id,
           userId: user?.uid,
-          commentText: typingComment.trim(),
-          username:user?.displayName
+          commentText: commentInput.trim(),
+          username: user?.displayName,
         };
 
         setTotalComments((prev) => (prev ? [...prev, commentData] : [commentData]));
-        setTypingComment('');
+        setCommentInput('');
       } catch (err) {
         console.log(err);
       }
     }
   };
-
-  // const deletePost = async () => {
-  //   try {
-  //     // Delete the post document
-  //     const postDoc = doc(database, 'Posts', post.id);
-  //     await deleteDoc(postDoc);
-  
-  //     // Delete the likes associated with the post
-  //     const likesQuery = query(LikesRef, where('postId', '==', post.id));
-  //     const likesSnapshot = await getDocs(likesQuery);
-  //     likesSnapshot.forEach(async (likeDoc) => {
-  //       const likeId = likeDoc.id;
-  //       const likeToDelete = doc(database, 'Likes', likeId);
-  //       await deleteDoc(likeToDelete);
-  //     });
-  
-  //     // Delete the comments associated with the post
-  //     const commentsQuery = query(CommentsRef, where('postId', '==', post.id));
-  //     const commentsSnapshot = await getDocs(commentsQuery);
-  //     commentsSnapshot.forEach(async (commentDoc) => {
-  //       const commentId = commentDoc.id;
-  //       const commentToDelete = doc(database, 'Comments', commentId);
-  //       await deleteDoc(commentToDelete);
-  //     });
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
-
 
   const deletePost = async () => {
     try {
@@ -169,11 +139,11 @@ const Post = (props: PostProps) => {
         console.log("You are not authorized to delete this post.");
         return;
       }
-  
+
       // Delete the post document
       const postDoc = doc(database, 'Posts', post.id);
       await deleteDoc(postDoc);
-  
+
       // Delete the likes associated with the post
       const likesQuery = query(LikesRef, where('postId', '==', post.id));
       const likesSnapshot = await getDocs(likesQuery);
@@ -182,7 +152,7 @@ const Post = (props: PostProps) => {
         const likeToDelete = doc(database, 'Likes', likeId);
         await deleteDoc(likeToDelete);
       });
-  
+
       // Delete the comments associated with the post
       const commentsQuery = query(CommentsRef, where('postId', '==', post.id));
       const commentsSnapshot = await getDocs(commentsQuery);
@@ -191,24 +161,24 @@ const Post = (props: PostProps) => {
         const commentToDelete = doc(database, 'Comments', commentId);
         await deleteDoc(commentToDelete);
       });
+
+      // Call the onDelete callback to notify the parent component
+      onDelete();
     } catch (err) {
       console.log(err);
     }
   };
-  
-  
 
   useEffect(() => {
-    getLikes();
-    getComments();
+    getPostData();
   }, []);
+
 
   return (
     <div className='postcard'>
       <div className='title'>
         <h2>{post.title}</h2>
         <button onClick={deletePost}>Delete Post</button>
-
       </div>
 
       <div className='desc'>
@@ -222,12 +192,12 @@ const Post = (props: PostProps) => {
       </div>
 
       <div className='commentsbox'>
-        {enableCommentInput && (
+        {totalComments && (
           <>
             <input
               type='text'
-              value={typingComment}
-              onChange={(e) => setTypingComment(e.target.value)}
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
             />
             <button onClick={postComment}>Shoot</button>
           </>
@@ -236,7 +206,7 @@ const Post = (props: PostProps) => {
 
       <div className='username'>
         <p>@{post.username}</p>
-        <button onClick={liked ? LikeDeletion : LikeFunction}>
+        <button onClick={liked ? likeDeletion : likeFunction}>
           {liked ? <>&#128078;</> : <>&#128077;</>}
         </button>
         {totalLikes && <p> {totalLikes.length} Likes</p>}
@@ -253,6 +223,5 @@ const Post = (props: PostProps) => {
       </div>
     </div>
   );
-};
-
-export default Post;
+}
+export default Post

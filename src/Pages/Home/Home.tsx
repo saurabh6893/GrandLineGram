@@ -1,44 +1,50 @@
-import React, { useEffect, useState } from 'react'
-import { Auth, database } from '../../Configs/Firebaseconfig'
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { collection, getDocs } from 'firebase/firestore'
-import Post from '../../Components/Post/Post'
-import './Home.css'
-import Profile from '../../Components/Profile/Profile'
+import React, { useEffect, useState } from 'react';
+import { Auth, database } from '../../Configs/Firebaseconfig';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { collection, getDocs, deleteDoc, doc, query, where } from 'firebase/firestore';
 
-export interface Post {
-  id: string
-  userId: string
-  title: string
-  username: string
-  description: string
-}
+import './Home.css';
+import { Post as PostInterface } from '../../Configs/Interfaces';
+import Post from '../../Components/Post/Post';
 
 const Home = () => {
-  const [postList, setPostList] = useState<Post[] | null>(null)
-  const [user] = useAuthState(Auth)
-  const PostsRef = collection(database, 'Posts')
+  const [postList, setPostList] = useState<PostInterface[] | null>(null);
+  const [user] = useAuthState(Auth);
+
+  const deletePost = async (postId: string) => {
+    try {
+      const postRef = doc(database, 'Posts', postId);
+      await deleteDoc(postRef);
+
+      setPostList((prevPostList) =>
+        prevPostList ? prevPostList.filter((post) => post.id !== postId) : null
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   useEffect(() => {
-    getPosts()
-  }, [])
+    const getPosts = async () => {
+      const PostsRef = collection(database, 'Posts');
+      const data = await getDocs(PostsRef);
+      setPostList(
+        data.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as PostInterface[]
+      );
+    };
 
-  const getPosts = async () => {
-    const data = await getDocs(PostsRef)
-    setPostList(
-      data.docs.map((doc) => ({ ...doc.data(), id: doc.id })) as Post[]
-    )
-  }
+    getPosts();
+  }, []);
 
   return (
     <>
       <div className='postscreen'>
-        {postList?.map((post: Post) => (
-          <Post post={post} />
+        {postList?.map((post: PostInterface) => (
+          <Post key={post.id} post={post} onDelete={() => deletePost(post.id)} />
         ))}
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
