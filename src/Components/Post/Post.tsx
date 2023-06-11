@@ -64,7 +64,7 @@ const Post = (props: PostProps) => {
 
   const [totalLikes, setTotalLikes] = useState<LikeInterface[] | null>(null);
   const [totalComments, setTotalComments] = useState<CommentInterface[] | null>(null);
-
+  const [visibleComments, setVisibleComments] = useState<boolean>(false)
   const likeFunction = async () => {
     const newDoc = await addDoc(LikesRef, {
       userId: user?.uid,
@@ -103,8 +103,7 @@ const Post = (props: PostProps) => {
   const liked = totalLikes?.find((like) => like.userId === user?.uid);
 
   const viewOrCreateCommentsFunc = () => {
-    setCommentInput('');
-    setTotalComments((prev) => (prev ? [] : null));
+    setVisibleComments(!visibleComments)
   };
 
   const postComment = async () => {
@@ -129,7 +128,10 @@ const Post = (props: PostProps) => {
       } catch (err) {
         console.log(err);
       }
+
+
     }
+    setVisibleComments(true)
   };
 
   const deletePost = async () => {
@@ -178,7 +180,12 @@ const Post = (props: PostProps) => {
     <div className='postcard'>
       <div className='title'>
         <h2>{post.title}</h2>
-        <button onClick={deletePost}>Delete Post</button>
+
+
+        {user?.uid === post.userId && (
+          <button onClick={deletePost}>Delete Post</button>
+        )}
+
       </div>
 
       <div className='desc'>
@@ -186,10 +193,11 @@ const Post = (props: PostProps) => {
         <>
           <BiMessageAltDetail className='cmtbox' onClick={viewOrCreateCommentsFunc} />
           <div className='cmtCount'>
-            {totalComments && <p> {totalComments.length} comments</p>}
+            {totalComments && <p> {totalComments?.length} </p>}
           </div>
         </>
       </div>
+
 
       <div className='commentsbox'>
         {totalComments && (
@@ -197,9 +205,14 @@ const Post = (props: PostProps) => {
             <input
               type='text'
               value={commentInput}
+              className='searchBar'
               onChange={(e) => setCommentInput(e.target.value)}
             />
-            <button onClick={postComment}>Shoot</button>
+
+            <button onClick={postComment} className='commentButton'>
+              Shoot
+            </button>
+
           </>
         )}
       </div>
@@ -213,8 +226,8 @@ const Post = (props: PostProps) => {
       </div>
 
       <div className='comments-section'>
-        {totalComments &&
-          totalComments.map((comment) => (
+        {visibleComments &&
+          totalComments?.map((comment) => (
             <div key={comment.commentId} className='comment'>
               <p className='comment-text'>{comment.commentText}</p>
               <p className='comment-username'>@{comment.username}</p>
